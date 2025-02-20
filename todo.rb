@@ -13,10 +13,7 @@ get "/" do
 end
 
 get "/lists" do
-  lists = [
-    { name: "Lunch Groceries", todos: []},
-    { name: "Dinner Groceries", todos: []}
-  ]
+  lists = session[:lists]
 
   erb :lists, locals: { lists: lists}
 end
