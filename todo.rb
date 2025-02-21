@@ -4,8 +4,8 @@ require "erubi"
 
 configure do
   enable :sessions
-  #set :session_secret, ENV['SESSION_SECRET']
-  set :session_secret, SecureRandom.hex(32)
+  set :session_secret, ENV['SESSION_SECRET']
+  #set :session_secret, SecureRandom.hex(32)
 end
 
 before do
