@@ -1,12 +1,19 @@
-source "https://rubygems.org"
+# frozen_string_literal: true
+
+source 'https://rubygems.org'
 
 group :production do
-  gem "puma"
+  gem 'puma'
 end
 
-gem "sinatra"
-gem "sinatra-contrib"
-gem "erubi"
-gem "rackup"
+group :development do
+  gem 'rubocop', '~> 1.72'
+  gem 'pry-byebug'
+end
 
-ruby "3.2.2"
+gem 'erubi'
+gem 'rackup'
+gem 'sinatra'
+gem 'sinatra-contrib'
+
+ruby '3.2.2'

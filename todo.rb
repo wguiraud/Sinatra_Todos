@@ -1,11 +1,13 @@
-require "sinatra"
-require "sinatra/reloader" if development?
-require "erubi"
+# frozen_string_literal: true
+
+require 'sinatra'
+require 'sinatra/reloader' if development?
+require 'erubi'
 
 configure do
   enable :sessions
   set :session_secret, ENV['SESSION_SECRET']
-  #set :session_secret, SecureRandom.hex(32)
+  # set :session_secret, SecureRandom.hex(32)
 end
 
 before do
@@ -30,11 +32,11 @@ end
 # generic. it can be reused in another context if needed
 def error_for_list_name(name)
   if used_list_name?(name)
-  "The list name must be unique"
+    'The list name must be unique'
   elsif invalid_character?(name)
-    "The list name must contain valid alphanumeric characters"
+    'The list name must contain valid alphanumeric characters'
   elsif invalid_length?(name)
-    "The list name must be between 1 and 100 characters"
+    'The list name must be between 1 and 100 characters'
   end
 end
 
@@ -42,21 +44,21 @@ def remove_white_spaces(list_name)
   list_name.strip
 end
 
-get "/" do
-  redirect "/lists"
+get '/' do
+  redirect '/lists'
 end
 
-get "/lists" do
+get '/lists' do
   lists = session[:lists]
 
   erb :lists, locals: { lists: lists }
 end
 
-get "/lists/new" do
+get '/lists/new' do
   erb :new_list
 end
 
-post "/lists" do
+post '/lists' do
   list_name = remove_white_spaces(params[:list_name])
 
   error = error_for_list_name(list_name)
@@ -65,8 +67,7 @@ post "/lists" do
     erb :new_list
   else
     session[:lists] << { name: list_name, todos: [] }
-    session[:success] = "The list has been created."
-    redirect "/lists"
+    session[:success] = 'The list has been created.'
+    redirect '/lists'
   end
-
 end
