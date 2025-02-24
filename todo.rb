@@ -3,6 +3,7 @@
 require 'sinatra'
 require 'sinatra/reloader' if development?
 require 'erubi'
+require 'pry'
 
 configure do
   enable :sessions
@@ -43,6 +44,10 @@ def remove_white_spaces(list_name)
   list_name.strip
 end
 
+def id
+
+end
+
 get '/' do
   redirect '/lists'
 end
@@ -69,4 +74,12 @@ post '/lists' do
     session[:success] = 'The list has been created.'
     redirect '/lists'
   end
+end
+
+get '/lists/:id' do
+  list_id = params[:id].to_i
+  list_name = session[:lists][list_id][:name]
+  todos = session[:lists][list_id][:todos]
+
+  erb :list, locals: { list_name: list_name, todos: todos}
 end

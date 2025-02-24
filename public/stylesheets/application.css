@@ -19,23 +19,23 @@ body > header h1 {
   display: inline-block;
   width: 38%;
   font-size: 30px;
-  color: #dd5f4f; 
+  color: #dd5f4f;
 }
 
 body > header .actions {
   display: inline-block;
   width: 60%;
-  text-align: right; 
+  text-align: right;
 }
 
 body > header .actions a {
   -webkit-transition: color 200ms ease;
   -moz-transition: color 200ms ease;
-  -o-transition: color 200ms ease; 
+  -o-transition: color 200ms ease;
 }
 
 body > header .actions a:hover {
-  color: #dd5f4f; 
+  color: #dd5f4f;
 }
 
 body > header .actions a.add:before {
@@ -178,6 +178,7 @@ form fieldset.actions a:hover {
   background: #dd5f4f; 
 }
 
+
 #lists li.complete:before {
   width: 28px;
   height: 28px;
@@ -217,7 +218,7 @@ form fieldset.actions a:hover {
 #todos header {
   padding: 15px 20px;
   border-radius: 6px;
-  background: #f6f6f6; 
+  background: #f6f6f6;
 }
 
 #todos header h2 {
