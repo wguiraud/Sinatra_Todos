@@ -1,16 +1,65 @@
+<!--list.erb-->
 <section id="todos">
   <header>
     <h2><%= list_name %></h2>
+    <ul>
+      <li>
+        <a class="edit" href="/lists/<%= list_id %>/edit">Edit List</a>
+      </li>
+    </ul>
   </header>
+
+  <ul>
+    <% todos.each_with_index do |todo, todo_id| %>
+
+      <% if todo[:completed] == false %>
+
+        <li>
+          <form action="/lists/<%= list_id %>/todo/<%= todo_id %>"
+                method="post"
+                class="check">
+            <input type="hidden" name="completed" value="true">
+            <button type="submit">Complete</button>
+          </form>
+
+          <h3><%= todo[:name] %></h3>
+          <form action="/lists/<%= list_id %>/todo/<%= todo_id %>/delete"
+                method="post"
+                class="delete">
+            <button type="submit" >Delete</button>
+          </form>
+        </li>
+
+      <% else %>
+
+        <li class="complete">
+          <form action="/lists/<%= list_id %>/todo/<%= todo_id %>"
+                method="post"
+                class="check">
+            <input type="hidden" name="completed" value="false">
+            <button type="submit">Complete</button>
+          </form>
+
+          <h3><%= todo[:name] %></h3>
+          <form action="/lists/<%= list_id %>/todo/<%= todo_id %>/delete"
+                method="post"
+                class="delete">
+            <button type="submit" >Delete</button>
+          </form>
+        </li>
+
+      <% end %>
+    <% end %>
+  </ul>
 </section>
 
-<form action="#" method="post">
+<form action="/lists/<%= list_id %>/add_todo" method="post">
   <dl>
     <dt>
       <label>Enter a new todo item:</label>
     </dt>
     <dd>
-      <input type="text" name="todo_name" placeholder="Todo text">
+      <input type="text" name="todo_name" placeholder="<%= todo_name ? todo_name : 'todo name'%>">
     </dd>
   </dl>
   <fieldset class="actions">
@@ -18,14 +67,8 @@
   </fieldset>
 </form>
 
-<% todos.each do |todo| %>
-  <ul>
-    <li>
-      <a href="#">
-        <h2><%= todo[:name] %></h2>
-      </a>
-    </li>
-  </ul>
+
+<% content_for :header_links do %>
+  <a href="/lists" class="list">All Lists</a>
 <% end %>
 
-<a href="/lists">All Lists</a>

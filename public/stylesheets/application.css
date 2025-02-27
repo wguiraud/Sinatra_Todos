@@ -133,17 +133,18 @@ form fieldset.actions a:hover {
   padding: 10px 20px;
   margin: 20px auto 1.5em auto;
   color: #3399cc;
-  background: #CBE5F2; 
+  background: #CBE5F2;
+  border-radius: 5px;
 }
 
 .flash p {
   font-size: 14px;
-  font-weight: bold; 
+  font-weight: bold;
 }
 
 .flash.error {
   color: #ff6633;
-  background: #FFCFBF; 
+  background: #FFCFBF;
 }
 
 .flash.success {
@@ -312,7 +313,7 @@ form fieldset.actions a:hover {
 }
 
 #todos header ul button.check:hover {
-  color: #00B059; 
+  color: #00B059;
 }
 
 #todos header ul button.check:before {

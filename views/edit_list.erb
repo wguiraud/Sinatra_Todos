@@ -1,0 +1,28 @@
+<!--edit_list.erb-->
+<section id="todos">
+  <header>
+    <h2>Editing: "<%= list_name %>"</h2>
+    <ul>
+      <li>
+        <form action="/lists/<%= list_id %>/delete" method="post">
+          <button class="delete" type="submit">Delete List</button>
+        </form>
+      </li>
+    </ul>
+  </header>
+</section>
+
+<form action="/lists/<%= list_id %>" method="post">
+  <dl>
+    <dt>
+      <label>Enter a new name for this list:</label>
+    </dt>
+    <dd>
+      <input type="text" name="list_name" placeholder="<%= list_name %>">
+    </dd>
+  </dl>
+  <fieldset class="actions">
+    <input type="submit" value="Save">
+    <a href="/lists/<%= list_id %>">Cancel</a>
+  </fieldset>
+</form>

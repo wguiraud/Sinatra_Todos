@@ -1,4 +1,5 @@
 <!doctype html>
+<!--layout.erb-->
 <html lang="en-US">
   <head>
     <title>Todo App</title>
@@ -10,7 +11,9 @@
   <body>
     <header class="actions">
       <h1>Todo Tracker</h1>
-      <a class="add" href="/lists/new">New List</a>
+      <div class="actions">
+        <%= yield_content :header_links%>
+      </div>
     </header>
 
     <% if session[:error] %>
