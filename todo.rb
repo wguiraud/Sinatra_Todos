@@ -15,9 +15,6 @@ before do
   session[:lists] ||= []
 end
 
-helpers do
-end
-
 def used_list_name?(name)
   session[:lists].any? { |list| list[:name] == name }
 end
@@ -65,8 +62,30 @@ def remove_white_spaces(name)
   name.strip
 end
 
-def id
+def complete_all_todos(list_id)
+  session[:lists][list_id][:todos].each do |todo|
+    todo[:completed] = true
+  end
+end
 
+helpers do
+  def all_completed?(list_id)
+    session[:lists][list_id][:todos].all? { |todo| todo[:completed] }
+  end
+
+  def at_least_one_todo?(list_id)
+    session[:lists][list_id][:todos].size > 0
+  end
+
+  def number_of_remaining_todos(list_id)
+    session[:lists][list_id][:todos].count { |td| !td[:completed] }
+  end
+
+  def list_class(list_id)
+    if all_completed?(list_id) && at_least_one_todo?(list_id)
+      "complete"
+  end
+  end
 end
 
 get '/' do
@@ -174,11 +193,19 @@ post "/lists/:id/todo/:todo_id" do
 
   if params[:completed] == 'false'
     session[:lists][list_id][:todos][todo_id][:completed] = false
-    session[:success] = "The #{todo_name}' todo is now uncompleted!'"
+    session[:success] = "The '#{todo_name}' todo is now uncompleted!'"
     redirect "/lists/#{list_id}"
   else
     session[:lists][list_id][:todos][todo_id][:completed] = true
     session[:success] = "The '#{todo_name}' todo is now completed"
     redirect "/lists/#{list_id}"
   end
+end
+
+post "/lists/:id/complete_all" do
+  list_id = params[:id].to_i
+  complete_all_todos(list_id)
+
+  session[:success] = 'All the todos are completed'
+  redirect "/lists/#{list_id}"
 end

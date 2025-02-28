@@ -1,8 +1,12 @@
-<!--list.erb-->
-<section id="todos">
+<section id="todos" class="<%= list_class(list_id) %>">
   <header>
     <h2><%= list_name %></h2>
     <ul>
+      <li>
+        <form action="/lists/<%= list_id %>/complete_all" method="post">
+          <button class="check" type="submit">Complete All</button>
+        </form>
+      </li>
       <li>
         <a class="edit" href="/lists/<%= list_id %>/edit">Edit List</a>
       </li>
@@ -11,44 +15,26 @@
 
   <ul>
     <% todos.each_with_index do |todo, todo_id| %>
-
-      <% if todo[:completed] == false %>
-
-        <li>
-          <form action="/lists/<%= list_id %>/todo/<%= todo_id %>"
-                method="post"
-                class="check">
-            <input type="hidden" name="completed" value="true">
-            <button type="submit">Complete</button>
-          </form>
-
-          <h3><%= todo[:name] %></h3>
-          <form action="/lists/<%= list_id %>/todo/<%= todo_id %>/delete"
-                method="post"
-                class="delete">
-            <button type="submit" >Delete</button>
-          </form>
-        </li>
-
-      <% else %>
-
+      <% if todo[:completed] %>
         <li class="complete">
-          <form action="/lists/<%= list_id %>/todo/<%= todo_id %>"
-                method="post"
-                class="check">
-            <input type="hidden" name="completed" value="false">
-            <button type="submit">Complete</button>
-          </form>
-
-          <h3><%= todo[:name] %></h3>
-          <form action="/lists/<%= list_id %>/todo/<%= todo_id %>/delete"
-                method="post"
-                class="delete">
-            <button type="submit" >Delete</button>
-          </form>
-        </li>
-
+      <% else %>
+        <li>
       <% end %>
+        <form action="/lists/<%= list_id %>/todo/<%= todo_id %>"
+              method="post"
+              class="check">
+          <input type="hidden" name="completed" value="<%= todo[:completed] ?
+                                                           'false' : 'true' %>">
+          <button type="submit">Complete</button>
+        </form>
+
+        <h3><%= todo[:name] %></h3>
+        <form action="/lists/<%= list_id %>/todo/<%= todo_id %>/delete"
+              method="post"
+              class="delete">
+          <button type="submit" >Delete</button>
+        </form>
+      </li>
     <% end %>
   </ul>
 </section>
