@@ -27,7 +27,7 @@ end
 
 
 def invalid_character?(name)
-  valid_characters = /^[a-zA-Z0-9_]+ ?[a-zA-Z0-9_]+$/
+  valid_characters = /^[a-zA-Z0-9_-]+ ?[a-zA-Z0-9_]+$/
   !name.match?(valid_characters)
 end
 
@@ -62,30 +62,88 @@ def remove_white_spaces(name)
   name.strip
 end
 
-def complete_all_todos(list_id)
-  session[:lists][list_id][:todos].each do |todo|
-    todo[:completed] = true
-  end
+def complete_all_todos(list)
+  list[:todos].each { |todo| todo[:completed] = true }
 end
 
 helpers do
-  def all_completed?(list_id)
-    session[:lists][list_id][:todos].all? { |todo| todo[:completed] }
+  def all_completed?(list)
+    list[:todos].size > 0 && number_of_remaining_todos(list) == 0
   end
 
-  def at_least_one_todo?(list_id)
-    session[:lists][list_id][:todos].size > 0
+  def at_least_one_todo?(list)
+    list[:todos].size > 0
   end
 
-  def number_of_remaining_todos(list_id)
-    session[:lists][list_id][:todos].count { |td| !td[:completed] }
+  def number_of_remaining_todos(list)
+    list[:todos].count { |todo| todo[:completed] == false }
   end
 
-  def list_class(list_id)
-    if all_completed?(list_id) && at_least_one_todo?(list_id)
+  def list_class(list)
+    if all_completed?(list) && at_least_one_todo?(list)
       "complete"
+    end
   end
+
+  def sort_lists(lists, &block)
+    incomplete_lists, complete_lists = {}, {}
+    lists.each_with_index do |list, index|
+      if all_completed?(list)
+        complete_lists[index] = list
+      else
+        incomplete_lists[index] = list
+      end
+    end
+
+    incomplete_lists.each { |index, list| yield list, index }
+    complete_lists.each { |index, list| yield list, index }
   end
+
+
+=begin
+Problem: given an array of lists where each list is ordered by time, yield a
+list of incomplete lists as well as their original index and yield another
+list of complete lists as well as their original index.
+
+Input: An ordered array of lists
+Yield: An array of incomplete lists that contains its original index and
+another array of complete lists that contains its original index.
+
+Example: [
+          { name: "groceries", todos:
+                                [ { name: "milk", completed: false } ]
+          },
+          { name: "wines", todos:
+                                [ { name: "red", completed: true },
+                                  { name: "white", completed: true },
+                                  { name: "rose", completed: true }
+                                ]
+          },
+          { name: "vacation destination", todos:
+                                [ { name: "australia", completed: true },
+                                  { name: "France", completed: true },
+                                  { name: "new-zealand", completed: true },
+                                ]
+          },
+          ]
+
+[ 0: { name: "groceries", todos: [ { name: "milk", completed: false } ] yield
+ index, list
+[ 1: {}, 2: {} ]
+
+Mental model:
+- initialize two hashes one to hold incomplete lists and one to hold complete
+ lists
+- iterate over the original order list of lists
+- populate the incomplete hash with the current list index as key and the
+content of the list as value
+- populate the complete hash with the current list index as key and the
+content of the list as value
+- iterate over the incomplete list an yield the current list index and the
+content of the list itself
+- iterate over the complete list an yield the current list index and the
+content of the list itself
+=end
 end
 
 get '/' do
@@ -119,10 +177,12 @@ end
 get '/lists/:id' do
   list_id = params[:id].to_i
   list_name = session[:lists][list_id][:name]
+  list = session[:lists][list_id]
   todos = session[:lists][list_id][:todos]
   todo_name = nil
 
-  erb :list, locals: { list_name: list_name, list_id: list_id, todos: todos, todo_name: todo_name}
+  erb :list, locals: { list: list, list_name: list_name, list_id: list_id,
+                       todos: todos, todo_name: todo_name}
 end
 
 get '/lists/:id/edit' do
@@ -162,12 +222,13 @@ post "/lists/:id/add_todo" do
   list_name = session[:lists][list_id][:name]
   todo_name = remove_white_spaces(params[:todo_name])
   todos = session[:lists][list_id][:todos]
+  list = session[:lists][list_id]
 
   error = error_for_todo_name(todo_name)
   if error
     session[:error] = error
-    erb :list, locals: { list_id: list_id, list_name: list_name, todos:
-      todos, todo_name: todo_name }
+    erb :list, locals: { list: list, list_id: list_id, list_name: list_name,
+                         todos: todos, todo_name: todo_name }
   else
     todos << { name: todo_name, completed: false }
     session[:success] = "The todo '#{ todo_name}' has been created successfully."
@@ -189,22 +250,23 @@ end
 post "/lists/:id/todo/:todo_id" do
   list_id = params[:id].to_i
   todo_id = params[:todo_id].to_i
-  todo_name = session[:lists][list_id][:todos][todo_id][:name]
+  list = session[:lists][list_id]
 
   if params[:completed] == 'false'
-    session[:lists][list_id][:todos][todo_id][:completed] = false
-    session[:success] = "The '#{todo_name}' todo is now uncompleted!'"
+    list[:todos][todo_id][:completed] = false
+    session[:success] = "The todo has been updated"
     redirect "/lists/#{list_id}"
   else
-    session[:lists][list_id][:todos][todo_id][:completed] = true
-    session[:success] = "The '#{todo_name}' todo is now completed"
+    list[:todos][todo_id][:completed] = true
+    session[:success] = "The todo has been updated"
     redirect "/lists/#{list_id}"
   end
 end
 
 post "/lists/:id/complete_all" do
   list_id = params[:id].to_i
-  complete_all_todos(list_id)
+  list = session[:lists][list_id]
+  complete_all_todos(list)
 
   session[:success] = 'All the todos are completed'
   redirect "/lists/#{list_id}"

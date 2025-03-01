@@ -1,22 +1,18 @@
 <!--lists.erb-->
-<% if lists.empty? %>
-  <div id="no_list"></div>
-<% else %>
-  <ul id="lists">
-    <% lists.each_with_index do |list, idx| %>
-      <% if all_completed?(idx) && at_least_one_todo?(idx) %>
-        <li class="complete">
-      <% else %>
-        <li>
-      <% end %>
-        <a href="/lists/<%= idx %>">
-          <h2><%= list[:name] %></h2>
-          <p><%= number_of_remaining_todos(idx) %> / <%= list[:todos].size %></p>
-        </a>
-        </li>
+<ul id="lists">
+  <% sort_lists(lists) do |list, idx| %>
+    <% if all_completed?(list) && at_least_one_todo?(list) %>
+      <li class="<%= list_class(list) %>">
+    <% else %>
+      <li>
     <% end %>
-  </ul>
-<% end %>
+      <a href="/lists/<%= idx %>">
+        <h2><%= list[:name] %></h2>
+        <p><%= number_of_remaining_todos(list) %> / <%= list[:todos].size %></p>
+      </a>
+      </li>
+  <% end %>
+</ul>
 
 <% content_for :header_links do %>
   <a class="add" href="/lists/new">New List</a>
