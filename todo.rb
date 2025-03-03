@@ -4,7 +4,7 @@ require 'sinatra'
 require 'sinatra/reloader' if development?
 require 'sinatra/content_for'
 require 'erubi'
-require 'pry'
+#require 'pry'
 
 configure do
   enable :sessions
