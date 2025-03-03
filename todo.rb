@@ -86,17 +86,17 @@ helpers do
   end
 
   def sort_lists(lists, &block)
-    incomplete_lists, complete_lists = {}, {}
-    lists.each_with_index do |list, index|
-      if all_completed?(list)
-        complete_lists[index] = list
-      else
-        incomplete_lists[index] = list
-      end
-    end
+    completed_lists, uncompleted_lists = lists.partition {|list| all_completed?(list)}
 
-    incomplete_lists.each { |index, list| yield list, index }
-    complete_lists.each { |index, list| yield list, index }
+    uncompleted_lists.each { |list| yield(list, lists.index(list)) }
+    completed_lists.each { |list| yield(list, lists.index(list)) }
+  end
+
+  def sort_todos(todos, &block)
+    completed_todos, uncompleted_todos = todos.partition { |todo| todo[:completed]}
+
+    uncompleted_todos.each { |todo| yield(todo, todos.index(todo))}
+    completed_todos.each { |todo| yield(todo, todos.index(todo))}
   end
 
 
