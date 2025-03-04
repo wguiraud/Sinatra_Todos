@@ -9,6 +9,7 @@ require 'erubi'
 configure do
   enable :sessions
   set :session_secret, ENV['SESSION_SECRET']
+  set :erb, escape_html: true
 end
 
 before do
@@ -66,6 +67,13 @@ def complete_all_todos(list)
   list[:todos].each { |todo| todo[:completed] = true }
 end
 
+def load_list(list_id)
+  unless (0..session[:lists].size).include?(list_id)
+    session[:error] = "The specified list was not found"
+    redirect '/lists'
+  end
+end
+
 helpers do
   def all_completed?(list)
     list[:todos].size > 0 && number_of_remaining_todos(list) == 0
@@ -98,52 +106,6 @@ helpers do
     uncompleted_todos.each { |todo| yield(todo, todos.index(todo))}
     completed_todos.each { |todo| yield(todo, todos.index(todo))}
   end
-
-
-=begin
-Problem: given an array of lists where each list is ordered by time, yield a
-list of incomplete lists as well as their original index and yield another
-list of complete lists as well as their original index.
-
-Input: An ordered array of lists
-Yield: An array of incomplete lists that contains its original index and
-another array of complete lists that contains its original index.
-
-Example: [
-          { name: "groceries", todos:
-                                [ { name: "milk", completed: false } ]
-          },
-          { name: "wines", todos:
-                                [ { name: "red", completed: true },
-                                  { name: "white", completed: true },
-                                  { name: "rose", completed: true }
-                                ]
-          },
-          { name: "vacation destination", todos:
-                                [ { name: "australia", completed: true },
-                                  { name: "France", completed: true },
-                                  { name: "new-zealand", completed: true },
-                                ]
-          },
-          ]
-
-[ 0: { name: "groceries", todos: [ { name: "milk", completed: false } ] yield
- index, list
-[ 1: {}, 2: {} ]
-
-Mental model:
-- initialize two hashes one to hold incomplete lists and one to hold complete
- lists
-- iterate over the original order list of lists
-- populate the incomplete hash with the current list index as key and the
-content of the list as value
-- populate the complete hash with the current list index as key and the
-content of the list as value
-- iterate over the incomplete list an yield the current list index and the
-content of the list itself
-- iterate over the complete list an yield the current list index and the
-content of the list itself
-=end
 end
 
 get '/' do
@@ -176,6 +138,8 @@ end
 
 get '/lists/:id' do
   list_id = params[:id].to_i
+  load_list(list_id)
+
   list_name = session[:lists][list_id][:name]
   list = session[:lists][list_id]
   todos = session[:lists][list_id][:todos]
@@ -187,6 +151,7 @@ end
 
 get '/lists/:id/edit' do
   list_id = params[:id].to_i
+  load_list(list_id)
   list_name = session[:lists][list_id][:name]
 
   erb :edit_list, locals: { list_id: list_id, list_name: list_name }
@@ -194,6 +159,7 @@ end
 
 post '/lists/:id' do
   list_id = params[:id].to_i
+  load_list(list_id)
   list_name = params[:list_name]
 
   error = error_for_list_name(list_name)
@@ -210,6 +176,7 @@ end
 
 post "/lists/:id/delete" do
   list_id = params[:id].to_i
+  load_list(list_id)
   list_name = session[:lists][list_id][:name]
   session[:lists].delete_at(list_id)
 
@@ -219,6 +186,7 @@ end
 
 post "/lists/:id/add_todo" do
   list_id = params[:id].to_i
+  load_list(list_id)
   list_name = session[:lists][list_id][:name]
   todo_name = remove_white_spaces(params[:todo_name])
   todos = session[:lists][list_id][:todos]
@@ -239,6 +207,7 @@ end
 
 post "/lists/:id/todo/:todo_id/delete" do
   list_id = params[:id].to_i
+  load_list(list_id)
   todo_id = params[:todo_id].to_i
   todo_name = session[:lists][list_id][:todos][todo_id][:name]
 
@@ -249,6 +218,7 @@ end
 
 post "/lists/:id/todo/:todo_id" do
   list_id = params[:id].to_i
+  load_list(list_id)
   todo_id = params[:todo_id].to_i
   list = session[:lists][list_id]
 
@@ -265,6 +235,7 @@ end
 
 post "/lists/:id/complete_all" do
   list_id = params[:id].to_i
+  load_list(list_id)
   list = session[:lists][list_id]
   complete_all_todos(list)
 
