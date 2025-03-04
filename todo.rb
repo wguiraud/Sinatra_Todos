@@ -4,7 +4,7 @@ require 'sinatra'
 require 'sinatra/reloader' if development?
 require 'sinatra/content_for'
 require 'erubi'
-#require 'pry'
+# require 'pry'
 
 configure do
   enable :sessions
@@ -23,7 +23,6 @@ end
 def used_todo_name?(list, name)
   list[:todos].any? { |todo| todo[:name] == name }
 end
-
 
 def invalid_character?(name)
   valid_characters = /^[a-zA-Z0-9_-]+ ?[a-zA-Z0-9_]+$/
@@ -66,19 +65,19 @@ def complete_all_todos(list)
 end
 
 def load_list(list_id)
-  unless (0..session[:lists].size).include?(list_id)
-    session[:error] = "The specified list was not found"
-    redirect '/lists'
-  end
+  return if (0..session[:lists].size).include?(list_id)
+
+  session[:error] = 'The specified list was not found'
+  redirect '/lists'
 end
 
 helpers do
   def all_completed?(list)
-    list[:todos].size > 0 && number_of_remaining_todos(list) == 0
+    list[:todos].size.positive? && number_of_remaining_todos(list).zero?
   end
 
   def at_least_one_todo?(list)
-    list[:todos].size > 0
+    list[:todos].size.positive?
   end
 
   def number_of_remaining_todos(list)
@@ -86,23 +85,23 @@ helpers do
   end
 
   def list_class(list)
-    if all_completed?(list) && at_least_one_todo?(list)
-      "complete"
-    end
+    return unless all_completed?(list) && at_least_one_todo?(list)
+
+    'complete'
   end
 
-  def sort_lists(lists, &block)
-    completed_lists, uncompleted_lists = lists.partition {|list| all_completed?(list)}
+  def sort_lists(lists)
+    completed_lists, uncompleted_lists = lists.partition { |list| all_completed?(list) }
 
     uncompleted_lists.each { |list| yield(list, lists.index(list)) }
     completed_lists.each { |list| yield(list, lists.index(list)) }
   end
 
-  def sort_todos(todos, &block)
-    completed_todos, uncompleted_todos = todos.partition { |todo| todo[:completed]}
+  def sort_todos(todos)
+    completed_todos, uncompleted_todos = todos.partition { |todo| todo[:completed] }
 
-    uncompleted_todos.each { |todo| yield(todo, todos.index(todo))}
-    completed_todos.each { |todo| yield(todo, todos.index(todo))}
+    uncompleted_todos.each { |todo| yield(todo, todos.index(todo)) }
+    completed_todos.each { |todo| yield(todo, todos.index(todo)) }
   end
 end
 
@@ -129,7 +128,7 @@ post '/lists' do
     erb :new_list
   else
     session[:lists] << { name: list_name, todos: [] }
-    session[:success] = "The list '#{ list_name }' has been created."
+    session[:success] = "The list '#{list_name}' has been created."
     redirect '/lists'
   end
 end
@@ -144,7 +143,7 @@ get '/lists/:id' do
   todo_name = nil
 
   erb :list, locals: { list: list, list_name: list_name, list_id: list_id,
-                       todos: todos, todo_name: todo_name}
+                       todos: todos, todo_name: todo_name }
 end
 
 get '/lists/:id/edit' do
@@ -172,17 +171,17 @@ post '/lists/:id' do
   end
 end
 
-post "/lists/:id/delete" do
+post '/lists/:id/delete' do
   list_id = params[:id].to_i
   load_list(list_id)
   list_name = session[:lists][list_id][:name]
   session[:lists].delete_at(list_id)
 
   session[:success] = "The list '#{list_name}' was deleted."
-  redirect "/lists"
+  redirect '/lists'
 end
 
-post "/lists/:id/add_todo" do
+post '/lists/:id/add_todo' do
   list_id = params[:id].to_i
   load_list(list_id)
   list_name = session[:lists][list_id][:name]
@@ -197,13 +196,12 @@ post "/lists/:id/add_todo" do
                          todos: todos, todo_name: todo_name }
   else
     todos << { name: todo_name, completed: false }
-    session[:success] = "The todo '#{ todo_name}' has been created successfully."
+    session[:success] = "The todo '#{todo_name}' has been created successfully."
     redirect "/lists/#{list_id}"
   end
-
 end
 
-post "/lists/:id/todo/:todo_id/delete" do
+post '/lists/:id/todo/:todo_id/delete' do
   list_id = params[:id].to_i
   load_list(list_id)
   todo_id = params[:todo_id].to_i
@@ -214,24 +212,18 @@ post "/lists/:id/todo/:todo_id/delete" do
   redirect "/lists/#{list_id}"
 end
 
-post "/lists/:id/todo/:todo_id" do
+post '/lists/:id/todo/:todo_id' do
   list_id = params[:id].to_i
   load_list(list_id)
   todo_id = params[:todo_id].to_i
   list = session[:lists][list_id]
 
-  if params[:completed] == 'false'
-    list[:todos][todo_id][:completed] = false
-    session[:success] = "The todo has been updated"
-    redirect "/lists/#{list_id}"
-  else
-    list[:todos][todo_id][:completed] = true
-    session[:success] = "The todo has been updated"
-    redirect "/lists/#{list_id}"
-  end
+  list[:todos][todo_id][:completed] = params[:completed] != 'false'
+  session[:success] = 'The todo has been updated'
+  redirect "/lists/#{list_id}"
 end
 
-post "/lists/:id/complete_all" do
+post '/lists/:id/complete_all' do
   list_id = params[:id].to_i
   load_list(list_id)
   list = session[:lists][list_id]
