@@ -20,10 +20,8 @@ def used_list_name?(name)
   session[:lists].any? { |list| list[:name] == name }
 end
 
-def used_todo_name?(name)
-  session[:lists].select do |list|
-    list[:todos].any? { |todo| todo[:name] == name }
-  end.size > 0
+def used_todo_name?(list, name)
+  list[:todos].any? { |todo| todo[:name] == name }
 end
 
 
@@ -49,8 +47,8 @@ def error_for_list_name(name)
   end
 end
 
-def error_for_todo_name(name)
-  if used_todo_name?(name)
+def error_for_todo_name(list, name)
+  if used_todo_name?(list, name)
     'The todo name must be unique'
   elsif invalid_character?(name)
     'The name must contain valid alphanumeric characters'
@@ -192,7 +190,7 @@ post "/lists/:id/add_todo" do
   todos = session[:lists][list_id][:todos]
   list = session[:lists][list_id]
 
-  error = error_for_todo_name(todo_name)
+  error = error_for_todo_name(list, todo_name)
   if error
     session[:error] = error
     erb :list, locals: { list: list, list_id: list_id, list_name: list_name,
