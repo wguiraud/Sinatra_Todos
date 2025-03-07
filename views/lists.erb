@@ -5,7 +5,7 @@
       <ul id="lists">
         <% sort_lists(lists) do |list, idx| %>
           <% if all_completed?(list) && at_least_one_todo?(list) %>
-            <li class="<%= list_class(list) %>">
+            <li id="<%= idx %>" class="<%= list_class(list) %>">
           <% else %>
             <li>
           <% end %>

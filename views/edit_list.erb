@@ -4,7 +4,8 @@
     <h2>Editing: "<%= list_name %>"</h2>
     <ul>
       <li>
-        <form action="/lists/<%= list_id %>/delete" method="post">
+        <form class="delete" action="/lists/<%= list_id %>/delete"
+              method="post">
           <button class="delete" type="submit">Delete List</button>
         </form>
       </li>
