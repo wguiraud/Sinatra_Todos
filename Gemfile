@@ -7,8 +7,8 @@ group :production do
 end
 
 group :development do
-  gem 'rubocop', '~> 1.72'
   gem 'pry-byebug'
+  gem 'rubocop', '~> 1.72'
 end
 
 gem 'erubi'

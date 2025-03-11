@@ -3,12 +3,12 @@
     <h2><%= list_name %></h2>
     <ul>
       <li>
-        <form action="/lists/<%= list[:id] %>/complete_all" method="post">
+        <form action="/lists/<%= list_id %>/complete_all" method="post">
           <button class="check" type="submit">Complete All</button>
         </form>
       </li>
       <li>
-        <a class="edit" href="/lists/<%= list[:id]%>/edit">Edit List</a>
+        <a class="edit" href="/lists/<%= list_id %>/edit">Edit List</a>
       </li>
     </ul>
   </header>
@@ -23,8 +23,7 @@
         <form action="/lists/<%= list_id %>/todo/<%= todo[:id] %>"
               method="post"
               class="check">
-          <input type="hidden" name="completed" value="<%= todo[:completed] ?
-                                                           'false' : 'true' %>">
+          <input type="hidden" name="completed" value="<%= !todo[:completed] %>">
           <button type="submit">Complete</button>
         </form>
 
@@ -42,10 +41,10 @@
 <form action="/lists/<%= list_id %>/add_todo" method="post">
   <dl>
     <dt>
-      <label>Enter a new todo item:</label>
+      <label for="todo_name">Enter a new todo item:</label>
     </dt>
     <dd>
-      <input type="text" name="todo_name" placeholder="<%= todo_name ? todo_name : 'todo name'%>">
+      <input type="text" name="todo_name" id="todo_name" placeholder="<%= todo_name ? todo_name : 'todo name'%>">
     </dd>
   </dl>
   <fieldset class="actions">
