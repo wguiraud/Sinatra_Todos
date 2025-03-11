@@ -3,13 +3,13 @@
       <ul id="no_list">
 <% else %>
       <ul id="lists">
-        <% sort_lists(lists) do |list, idx| %>
+        <% sort_lists(lists) do |list| %>
           <% if all_completed?(list) && at_least_one_todo?(list) %>
-            <li id="<%= idx %>" class="<%= list_class(list) %>">
+            <li id="<%= list[:id] %>" class="<%= list_class(list) %>">
           <% else %>
             <li>
           <% end %>
-            <a href="/lists/<%= idx %>">
+            <a href="/lists/<%= list[:id] %>">
               <h2><%= list[:name] %></h2>
               <p><%= number_of_remaining_todos(list) %> / <%= list[:todos].size %></p>
             </a>
